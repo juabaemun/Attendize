@@ -13,7 +13,7 @@ Tarea 1 · 2.º DAW · IES Juan de Garay · Alumno: Juan José Baeza Muñoz
 - Rama de trabajo: `tarea-01-despliegue` · Etiquetas: `tarea-01-inicio`, `tarea-01-entrega`
 
 ## 2. Requisitos previos
-- SO: Windows con WSL2 + terminal 29.9.2
+- SO: Windows 11 con WSL 2 + terminal cmd/PowerShell y Git Bash
 - Docker version: 29.9.2
 - Docker Compose version: v5.6.1
 - Git: version 2.56.0.windows.4
@@ -58,6 +58,7 @@ build: #construir las imágenes
 
 up: 
     docker compose up -d
+    docker compose run --rm --no-deps web composer install
     docker compose ps
 
 migrate: #preparar la base de datos
@@ -114,7 +115,38 @@ Crear un evento, detener docker e inciar para comprobar persitencia en la base d
 - Solución: ejecutar composer install sobre la carpeta montada en lugar de modificar el compose--> docker compose run --rm --no-deps web composer install.
 - Commit relacionado: tarea-01-despliegue b63c159
 
-## 8. Evidencias
-(Cada una con fecha, explicación y commit)
+### Problema 6: `docker build` colgado en `extracting` y Docker Desktop no arranca
+- Fecha: 1/11/2026
+- Orden: `docker build --tag attendize_base --target base .`
+- Error: build detenido más de 14 minutos en `extracting`; después, `Docker Desktop is unable to start`. `wsl --update` falló con `ERROR_INSTALL_FAILURE` (código 1603).
+- Diagnóstico: `wsl -l -v`, `docker info`, espacio libre en `C:`.
+- Causa: <la que resultó: reinicio pendiente, disco, memoria...>
+- Solución: `wsl --shutdown`, cierre de procesos de Docker Desktop y reinicio del equipo.
+- Commit relacionado: ninguno (problema del entorno local)
 
-## 9. Limitaciones pendientes
+### Problema 7: `REDIS_HOST=127.0.0.1` no apunta al servicio `redis`
+- Fecha: 1/11/2026
+- Orden: revisión de `.env.example` y `docker-compose.yml`
+- Error: sin error visible; incoherencia detectada (dentro del contenedor, `127.0.0.1` es el propio contenedor)
+- Causa: valor por defecto del proyecto, pensado para otra instalación
+- Solución: `REDIS_HOST=redis` en `.env.example`
+- Commit relacionado: 
+
+### Problema 8: `composer install` sobrescribe `.env`
+- Fecha: 1/11/2026
+- Orden: `docker compose run --rm --no-deps web composer install`
+- Error: la salida muestra `copy('.env.example', '.env')` y `Application key set successfully`
+- Causa: script `post-install` del `composer.json` sobre una carpeta montada desde el host
+- Solución: llevar los valores necesarios a `.env.example` y recrear los contenedores (`docker compose up -d --force-recreate`)
+- Commit relacionado: 
+
+## 8. Evidencias
+
+| Comprobación | Fecha | Qué demuestra | Fichero |
+|---|---|---|---|
+| Contenedores | 2026-11-01 | Los cinco servicios en `Up`, sin reinicios | `docs\evidencias\docker compose a.png` |
+| Instalación | 2026-11-01 | La aplicación se ha insyalado | `docs\evidencias\Attendixe instalado.png` |
+| Organizador Creado | 2026-11-01 | Login y creación de organizador | `docs\evidencias\Organizador creado.png` |
+| Evento creado | 2026-11-01 | Creación de evento | `docs\evidencias\Evento creado.png` |
+| Persistencia | 2026-11-01 | Estado tras `stop` y `start` | `docs\evidencias\docker compose ps tras stop y start.png` |
+
