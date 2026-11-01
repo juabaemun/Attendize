@@ -34,7 +34,17 @@ Volúmenes: ...  Red: ...
 ## 4. Variables de entorno
 | Variable | Valor ficticio | Para qué sirve |
 |---|---|---|
-| DB_HOST | db | |
+| APP_URL |	https://localhost:8081 | URL base de la aplicación
+| APP_KEY | (vacía, la genera key:generate)	| Clave de cifrado de Laravel
+| APP_ENV / APP_DEBUG | local / true | Modo de ejecución y errores detallados
+| DB_CONNECTION	| mysql | Driver de base de datos
+| DB_HOST	| db | Nombre del servicio MySQL en la red de Compose
+| DB_PORT	| 3306 | Puerto de MySQL dentro de la red Docker
+| DB_DATABASE / DB_USERNAME / DB_PASSWORD | attendize (los tres) | Credenciales de desarrollo, no reales
+| QUEUE_CONNECTION | sync | Las colas se ejecutan en línea
+| CACHE_DRIVER / SESSION_DRIVER	| file | Almacenamiento en disco del contenedor
+| REDIS_HOST | 127.0.0.1 | Servidor Redis (revisar con el compose)
+| MAIL_HOST / MAIL_PORT	| maildev / 1025 | Servidor SMTP de pruebas
 
 ## 5. Puesta en marcha desde cero
 (clonar, .env, build, up, key:generate, migrate, /install)
@@ -45,11 +55,23 @@ Datos ficticios usados: ...
 
 ## 7. Problemas encontrados y decisiones
 ### Problema 1: `git push` rechazado (autenticación)
-- Fecha:
+- Fecha: 1/11/2026
 - Orden:
 - Error: `Invalid username or token. Password authentication is not supported...`
 - Causa: credencial antigua guardada que Git Credential Manager reutilizaba; GitHub no admite contraseña por HTTPS.
 - Solución: eliminar la credencial y reautenticar.
+- Commit relacionado:
+
+### Problema 2: Al hacer docker build --tag attendize_base --target base . --> apt-get update falla con 404 y EXPKEYSIG en [base 2/5].
+- Fecha: 1/11/2026
+- Orden: docker build --tag attendize_base --target base .
+- Error: `ERROR [base 2/5] RUN apt-get update && apt-get install -y wait-for-it libxrender1`
+- Causa: : imagen base Debian 10 (buster) fuera de soporte; repos movidos a archive.debian.org; clave de nginx caducada; repo sury de PHP retirado.
+- Solución: reemplazar la línea `RUN apt-get ...`  por `RUN sed -i 's|deb.debian.org|archive.debian.org|g; s|security.debian.org|archive.debian.org|g' /etc/apt/sources.list \
+                                && sed -i '/buster-updates/d; /nginx.org/d' /etc/apt/sources.list \
+                                && rm -f /etc/apt/sources.list.d/php.list \
+                                && apt-get -o Acquire::Check-Valid-Until=false update \
+                                && apt-get install -y wait-for-it libxrender1`     
 - Commit relacionado:
 
 ## 8. Evidencias
