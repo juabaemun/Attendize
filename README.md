@@ -72,7 +72,23 @@ Datos ficticios usados: ...
                                 && rm -f /etc/apt/sources.list.d/php.list \
                                 && apt-get -o Acquire::Check-Valid-Until=false update \
                                 && apt-get install -y wait-for-it libxrender1`     
-- Commit relacionado:
+- Commit relacionado: tarea-01-despliegue 5c84a2a
+
+### Problema 3: RUN ./scripts/setup falla con not found (exit 127). --> git ls-files --eol scripts muestra w/crlf.
+- Fecha: 1/11/2026
+- Orden: RUN ./scripts/setup 
+- Error: `RUN ./scripts/setup falla con not found`
+- Causa: conversión automática a CRLF de Git en Windows; el shebang queda como sh\r.
+- Solución: corregir en el repositorio con .gitattributes en lugar de parchear solo el Dockerfile, porque el compose monta el código del host. --> .gitattributes con eol=lf más renormalización.
+- Commit relacionado: tarea-01-despliegue 98f306c
+  
+### Problema 4: ERROR importing cache manifest from attendize_base:latest en los builds de worker y web.
+- Fecha: 1/11/2026
+- Orden: Ordenes buid de worker y web
+- Error: `ERROR importing cache manifest from attendize_base:latest  `
+- Causa: --cache-from busca la imagen en un registro remoto; las imágenes attendize_* solo existen en local.
+- Solución: No es necesaria, el build termina correctamente y reutiliza la caché local (CACHED). Mantener las órdenes tal como las declara el Makefile y dejar constancia
+- Commit relacionado: 
 
 ## 8. Evidencias
 (Cada una con fecha, explicación y commit)
