@@ -1,6 +1,6 @@
 # 07 · Planificación
 
-Responsable de todas las tareas: el propio alumno/a. Estados: Pendiente, En curso, En revisión, Finalizada. Estimación en horas.
+Responsable de todas las tareas: alumno/a. Estados: Pendiente, En curso, En revisión, Finalizada. Estimación en horas.
 
 ## Hitos
 - **H1 · Base técnica:** entorno y esquema preparados (T0, T1).
